@@ -1,0 +1,75 @@
+diff --git a/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/CMakeLists.txt b/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/CMakeLists.txt
+index 2da5b6bb..7fb9101 100644
+--- a/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/CMakeLists.txt
++++ b/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/CMakeLists.txt
+@@ -48,6 +48,7 @@ find_package(GSasl)
+ find_package(Threads)
+ 
+ include(CheckCXXSourceCompiles)
++include(CheckSymbolExists)
+ 
+ # Check if thread_local is supported
+ unset (THREAD_LOCAL_SUPPORTED CACHE)
+@@ -141,6 +142,11 @@ else (NOT NO_SASL)
+     message(STATUS "Compiling with NO SASL SUPPORT")
+ endif (NOT NO_SASL)
+ 
++check_symbol_exists(explicit_bzero "string.sh" HAVE_EXPLICIT_BZERO)
++if(HAVE_EXPLICIT_BZERO)
++    add_definitions(-DHAVE_EXPLICIT_BZERO)
++endif()
++
+ add_definitions(-DASIO_STANDALONE -DASIO_CPP11_DATE_TIME)
+ 
+ # Disable optimizations if compiling debug
+diff --git a/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/lib/bindings/c/hdfs.cc b/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/lib/bindings/c/hdfs.cc
+index 424bb6b..531cd4f 100644
+--- a/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/lib/bindings/c/hdfs.cc
++++ b/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/lib/bindings/c/hdfs.cc
+@@ -1402,7 +1402,11 @@ int hdfsGetBlockLocations(hdfsFS fs, const char *path, struct hdfsBlockLocations
+     hdfsBlockLocations *locations = new struct hdfsBlockLocations();
+     (*locations_out) = locations;
+ 
++#ifdef HAVE_EXPLICIT_ZERO
+     explicit_bzero(locations, sizeof(*locations));
++#else
++    bzero(locations, sizeof(*locations));
++#endif
+     locations->fileLength = ppLocations->getFileLength();
+     locations->isLastBlockComplete = ppLocations->isLastBlockComplete();
+     locations->isUnderConstruction = ppLocations->isUnderConstruction();
+diff --git a/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/tests/hdfs_ext_test.cc b/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/tests/hdfs_ext_test.cc
+index fb55172..65ba973 100644
+--- a/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/tests/hdfs_ext_test.cc
++++ b/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/tests/hdfs_ext_test.cc
+@@ -475,7 +475,12 @@ TEST_F(HdfsExtTest, TestReadStats) {
+   hdfsFile file = hdfsOpenFile(fs, path.c_str(), O_WRONLY, 0, 0, 0);
+   EXPECT_NE(nullptr, file);
+   void * buf = malloc(size);
+-  explicit_bzero(buf, size);
++#ifdef HAVE_EXPLICIT_ZERO
++    explicit_bzero(buf, size);
++#else
++    bzero(buf, size);
++#endif
++
+   EXPECT_EQ(size, hdfsWrite(fs, file, buf, size));
+   free(buf);
+   EXPECT_EQ(0, hdfsCloseFile(fs, file));
+diff --git a/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/tests/hdfspp_mini_dfs.h b/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/tests/hdfspp_mini_dfs.h
+index 98edbdc..c85f721 100644
+--- a/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/tests/hdfspp_mini_dfs.h
++++ b/hadoop-hdfs-project/hadoop-hdfs-native-client/src/main/native/libhdfspp/tests/hdfspp_mini_dfs.h
+@@ -92,7 +92,12 @@ public:
+     hdfsFile file = hdfsOpenFile(*this, path.c_str(), O_WRONLY, 0, 0, 0);
+     EXPECT_NE(nullptr, file);
+     void * buf = malloc(size);
++#ifdef HAVE_EXPLICIT_ZERO
+     explicit_bzero(buf, size);
++#else
++    bzero(buf, size);
++#endif
++
+     EXPECT_EQ(1024, hdfsWrite(*this, file, buf, size));
+     EXPECT_EQ(0, hdfsCloseFile(*this, file));
+     free(buf);

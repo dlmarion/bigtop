@@ -17,101 +17,101 @@
 set -ex
 
 usage() {
-  echo "
+echo "
 usage: $0 <options>
-  Required not-so-options:
-     --distro-dir=DIR            path to distro specific files (debian/RPM)
-     --build-dir=DIR             path to hive/build/dist
-     --prefix=PREFIX             path to install into
+Required not-so-options:
+--distro-dir=DIR            path to distro specific files (debian/RPM)
+--build-dir=DIR             path to hive/build/dist
+--prefix=PREFIX             path to install into
 
-  Optional options:
-     --native-build-string       eg Linux-amd-64 (optional - no native installed if not set)
-     ... [ see source for more similar options ]
-  "
-  exit 1
+Optional options:
+--native-build-string       eg Linux-amd-64 (optional - no native installed if not set)
+... [ see source for more similar options ]
+"
+exit 1
 }
 
 OPTS=$(getopt \
-  -n $0 \
-  -o '' \
-  -l 'prefix:' \
-  -l 'distro-dir:' \
-  -l 'build-dir:' \
-  -l 'native-build-string:' \
-  -l 'installed-lib-dir:' \
-  -l 'hadoop-dir:' \
-  -l 'hdfs-dir:' \
-  -l 'yarn-dir:' \
-  -l 'mapreduce-dir:' \
-  -l 'client-dir:' \
-  -l 'system-include-dir:' \
-  -l 'system-lib-dir:' \
-  -l 'system-libexec-dir:' \
-  -l 'hadoop-etc-dir:' \
-  -l 'doc-dir:' \
-  -l 'man-dir:' \
-  -l 'example-dir:' \
-  -l 'apache-branch:' \
-  -- "$@")
+-n $0 \
+-o '' \
+-l 'prefix:' \
+-l 'distro-dir:' \
+-l 'build-dir:' \
+-l 'native-build-string:' \
+-l 'installed-lib-dir:' \
+-l 'hadoop-dir:' \
+-l 'hdfs-dir:' \
+-l 'yarn-dir:' \
+-l 'mapreduce-dir:' \
+-l 'client-dir:' \
+-l 'system-include-dir:' \
+-l 'system-lib-dir:' \
+-l 'system-libexec-dir:' \
+-l 'hadoop-etc-dir:' \
+-l 'doc-dir:' \
+-l 'man-dir:' \
+-l 'example-dir:' \
+-l 'apache-branch:' \
+-- "$@")
 
 if [ $? != 0 ] ; then
-    usage
+usage
 fi
 
 eval set -- "$OPTS"
 while true ; do
-    case "$1" in
-        --prefix)
-        PREFIX=$2 ; shift 2
-        ;;
-        --distro-dir)
-        DISTRO_DIR=$2 ; shift 2
-        ;;
-        --hadoop-dir)
-        HADOOP_DIR=$2 ; shift 2
-        ;;
-        --hdfs-dir)
-        HDFS_DIR=$2 ; shift 2
-        ;;
-        --yarn-dir)
-        YARN_DIR=$2 ; shift 2
-        ;;
-        --mapreduce-dir)
-        MAPREDUCE_DIR=$2 ; shift 2
-        ;;
-        --client-dir)
-        CLIENT_DIR=$2 ; shift 2
-        ;;
-        --system-include-dir)
-        SYSTEM_INCLUDE_DIR=$2 ; shift 2
-        ;;
-        --system-lib-dir)
-        SYSTEM_LIB_DIR=$2 ; shift 2
-        ;;
-        --system-libexec-dir)
-        SYSTEM_LIBEXEC_DIR=$2 ; shift 2
-        ;;
-        --build-dir)
-        BUILD_DIR=$2 ; shift 2
-        ;;
-        --native-build-string)
-        NATIVE_BUILD_STRING=$2 ; shift 2
-        ;;
-        --doc-dir)
-        DOC_DIR=$2 ; shift 2
-        ;;
-        --hadoop-etc-dir)
-        HADOOP_ETC_DIR=$2 ; shift 2
-        ;;
-        --installed-lib-dir)
-        INSTALLED_LIB_DIR=$2 ; shift 2
-        ;;
-        --man-dir)
-        MAN_DIR=$2 ; shift 2
-        ;;
-        --example-dir)
-        EXAMPLE_DIR=$2 ; shift 2
-        ;;
+case "$1" in
+--prefix)
+PREFIX=$2 ; shift 2
+;;
+--distro-dir)
+DISTRO_DIR=$2 ; shift 2
+;;
+--hadoop-dir)
+HADOOP_DIR=$2 ; shift 2
+;;
+--hdfs-dir)
+HDFS_DIR=$2 ; shift 2
+;;
+--yarn-dir)
+YARN_DIR=$2 ; shift 2
+;;
+--mapreduce-dir)
+MAPREDUCE_DIR=$2 ; shift 2
+;;
+--client-dir)
+CLIENT_DIR=$2 ; shift 2
+;;
+--system-include-dir)
+SYSTEM_INCLUDE_DIR=$2 ; shift 2
+;;
+--system-lib-dir)
+SYSTEM_LIB_DIR=$2 ; shift 2
+;;
+--system-libexec-dir)
+SYSTEM_LIBEXEC_DIR=$2 ; shift 2
+;;
+--build-dir)
+BUILD_DIR=$2 ; shift 2
+;;
+--native-build-string)
+NATIVE_BUILD_STRING=$2 ; shift 2
+;;
+--doc-dir)
+DOC_DIR=$2 ; shift 2
+;;
+--hadoop-etc-dir)
+HADOOP_ETC_DIR=$2 ; shift 2
+;;
+--installed-lib-dir)
+INSTALLED_LIB_DIR=$2 ; shift 2
+;;
+--man-dir)
+MAN_DIR=$2 ; shift 2
+;;
+--example-dir)
+EXAMPLE_DIR=$2 ; shift 2
+;;
         --)
         shift ; break
         ;;
@@ -200,7 +200,8 @@ cp ${BUILD_DIR}/share/hadoop/common/lib/*.jar ${HADOOP_DIR}/lib
 install -d -m 0755 ${HADOOP_DIR}/tools/lib
 cp ${BUILD_DIR}/share/hadoop/tools/lib/*.jar ${HADOOP_DIR}/tools/lib
 install -d -m 0755 ${MAPREDUCE_DIR}/lib
-cp ${BUILD_DIR}/share/hadoop/mapreduce/lib/*.jar ${MAPREDUCE_DIR}/lib
+#cp ${BUILD_DIR}/share/hadoop/mapreduce/lib/*.jar ${MAPREDUCE_DIR}/lib
+cp ${BUILD_DIR}/share/hadoop/mapreduce/*.jar ${MAPREDUCE_DIR}/lib
 install -d -m 0755 ${HDFS_DIR}/lib 
 cp ${BUILD_DIR}/share/hadoop/hdfs/lib/*.jar ${HDFS_DIR}/lib
 install -d -m 0755 ${YARN_DIR}/lib
@@ -354,7 +355,9 @@ install -d -m 0755 $PREFIX/var/{log,run,lib}/hadoop-mapreduce
 for DIR in ${HADOOP_DIR} ${HDFS_DIR} ${YARN_DIR} ${MAPREDUCE_DIR} ; do
   (cd $DIR &&
    rm -fv *-sources.jar
-   rm -fv lib/hadoop-*.jar
+   
+   # dlmarion - commented this out as it is removing lib/hadoop-shaded-guava-1.1.1.jar and lib/hadoop-shaded-protobuf_3_7-1.1.1.jar
+   #rm -fv lib/hadoop-*.jar
    for j in hadoop-*.jar; do
      if [[ $j =~ hadoop-(.*)-${HADOOP_VERSION}.jar ]]; then
        name=${BASH_REMATCH[1]}

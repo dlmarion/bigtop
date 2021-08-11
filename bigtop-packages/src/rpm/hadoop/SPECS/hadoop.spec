@@ -559,9 +559,13 @@ env HADOOP_VERSION=%{hadoop_base_version} bash %{SOURCE2} \
   --man-dir=$RPM_BUILD_ROOT%{man_hadoop} \
 
 # Forcing Zookeeper dependency to be on the packaged jar
-%__ln_s -f /usr/lib/zookeeper/zookeeper.jar $RPM_BUILD_ROOT/%{lib_hadoop}/lib/zookeeper*.jar
+#%__ln_s -f /usr/lib/zookeeper/zookeeper.jar $RPM_BUILD_ROOT/%{lib_hadoop}/lib/zookeeper*.jar
+%__ln_s -f /usr/lib/zookeeper/zookeeper.jar $RPM_BUILD_ROOT/%{lib_hadoop}/lib/zookeeper-3.5.6.jar
 # Workaround for BIGTOP-583
 %__rm -f $RPM_BUILD_ROOT/%{lib_hadoop}-*/lib/slf4j-log4j12-*.jar
+
+# dlmarion - create empty file because it's missing
+touch $RPM_BUILD_ROOT%{etc_hadoop}/conf.empty/httpfs-signature.secret
 
 # Init.d scripts
 %__install -d -m 0755 $RPM_BUILD_ROOT/%{initd_dir}/

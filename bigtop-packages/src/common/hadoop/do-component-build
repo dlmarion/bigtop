@@ -118,14 +118,16 @@ mkdir build/src
  
 # Build artifacts
 MAVEN_OPTS="-Dzookeeper.version=$ZOOKEEPER_VERSION "
-MAVEN_OPTS+="-Djetty.version=9.3.29.v20201019 "
+MAVEN_OPTS+="-Djetty.version=9.4.40.v20210413 "
 MAVEN_OPTS+="-DskipTests -DskipTest -DskipITs "
+MAVEN_OPTS+="-Denforcer.skip "
 
 # Include common Maven Deployment logic
 . $(dirname ${0})/maven_deploy.sh
 
 # Build artifacts
-mvn $ANT_OPTS $BUNDLE_SNAPPY -Pdist -Pnative -Psrc -Pyarn-ui -Dtar ${MAVEN_OPTS} install package ${EXTRA_GOALS} "$@"
+#mvn $ANT_OPTS $BUNDLE_SNAPPY -Pdist -Pnative -Psrc -Pyarn-ui -Dtar ${MAVEN_OPTS} install package ${EXTRA_GOALS} "$@"
+mvn $ANT_OPTS $BUNDLE_SNAPPY -Pdist -Pnative -Psrc -Pyarn-ui -Dtar ${MAVEN_OPTS} package ${EXTRA_GOALS} "$@"
 mvn site site:stage ${MAVEN_OPTS} $@
 
 (cd build ; tar --strip-components=1 -xzvf  ../hadoop-dist/target/hadoop-${HADOOP_VERSION}.tar.gz)
